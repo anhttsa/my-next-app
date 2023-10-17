@@ -1,95 +1,92 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+import Link from 'next/link'
+import useSWR from 'swr'
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import { IBlog } from '../types/backend'
+import AppDialog from '@/components/app.dialog';
+import { useState } from 'react';
 
 export default function Home() {
+  const fetcher = (url: string) => fetch(url).then(res => res.json())
+  const { data, isLoading } = useSWR('http://localhost:8000/blogs', fetcher)
+
+  const [showDialog, setShowDialog] = useState<boolean>(false)
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <div>
+      <div style={{ display: 'flex', gap: 10, margin: '10px 0' }}>
+        <Link href={'/facebook'}>
+          <Button variant="contained" size="small" color="secondary">
+            Facebook
+          </Button>
+        </Link>
+        <Link href={'/youtube'}>
+          <Button variant="contained" size="small" color="secondary">
+            Youtube
+          </Button>
+        </Link>
+        <Link href={'/tiktok'}>
+          <Button variant="contained" size="small" color="secondary">
+            Tiktok
+          </Button>
+        </Link>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div>
+        <div></div>
+        <AppDialog showDialog={showDialog} setShowDialog={setShowDialog} />
       </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>No</TableCell>
+              <TableCell align="center">Title</TableCell>
+              <TableCell align="center">Content</TableCell>
+              <TableCell align="center">Author</TableCell>
+              <TableCell align="center">Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.map((row: IBlog) => (
+              <TableRow
+                key={row.id}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  {row.id}
+                </TableCell>
+                <TableCell align="left">{row.title}</TableCell>
+                <TableCell align="left">{row.content}</TableCell>
+                <TableCell align="left">{row.author}</TableCell>
+                <TableCell align="left">
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <Button variant="contained" size="small" onClick={() => setShowDialog(true)}>
+                      View
+                    </Button>
+                    <Button variant="contained" size="small" color="success">
+                      Edit
+                    </Button>
+                    <Button variant="contained" size="small" color="error">
+                      Delete
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   )
 }
